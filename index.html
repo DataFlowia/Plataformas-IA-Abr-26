@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe IA 2026 – DATAFLOW IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c14;
+    --bg2: #0d1321;
+    --bg3: #111827;
+    --cyan: #00e5ff;
+    --cyan2: #00b8d9;
+    --purple: #b44ff5;
+    --magenta: #e040fb;
+    --green: #00e676;
+    --text: #e2eaf5;
+    --text-dim: #7a8fa8;
+    --border: rgba(0,229,255,0.15);
+    --glow: rgba(0,229,255,0.08);
+    --card-bg: rgba(13,19,33,0.85);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* BACKGROUND GRID */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* AMBIENT GLOW BLOBS */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    z-index: 0;
+    animation: blobFloat 8s ease-in-out infinite;
+  }
+  .blob-1 { width: 500px; height: 500px; background: rgba(0,229,255,0.06); top: -100px; left: -150px; animation-delay: 0s; }
+  .blob-2 { width: 400px; height: 400px; background: rgba(180,79,245,0.07); bottom: 100px; right: -100px; animation-delay: 3s; }
+  .blob-3 { width: 300px; height: 300px; background: rgba(0,230,118,0.05); top: 40%; left: 50%; animation-delay: 5s; }
+  @keyframes blobFloat {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-30px) scale(1.05); }
+  }
+
+  /* HEADER */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(8,12,20,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 clamp(16px, 5vw, 60px);
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: slideDown 0.6s ease;
+  }
+  @keyframes slideDown { from { transform: translateY(-70px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .logo {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 900;
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    color: var(--cyan);
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 20px rgba(0,229,255,0.6), 0 0 40px rgba(0,229,255,0.3);
+    text-decoration: none;
+    animation: logoPulse 4s ease-in-out infinite;
+  }
+  @keyframes logoPulse {
+    0%, 100% { text-shadow: 0 0 20px rgba(0,229,255,0.6), 0 0 40px rgba(0,229,255,0.3); }
+    50% { text-shadow: 0 0 30px rgba(0,229,255,0.9), 0 0 60px rgba(0,229,255,0.5); }
+  }
+
+  .header-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--purple);
+    background: rgba(180,79,245,0.12);
+    border: 1px solid rgba(180,79,245,0.3);
+    padding: 4px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+
+  /* MAIN */
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: clamp(24px, 6vw, 60px) clamp(16px, 4vw, 40px);
+  }
+
+  /* HERO SECTION */
+  .hero {
+    text-align: center;
+    padding: clamp(40px, 8vw, 80px) 0 clamp(30px, 6vw, 60px);
+    animation: fadeUp 0.8s ease 0.2s both;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+  .hero-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.25);
+    padding: 6px 18px;
+    border-radius: 30px;
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: 'Roboto', sans-serif;
+    font-size: clamp(2rem, 7vw, 4rem);
+    font-weight: 900;
+    line-height: 1.1;
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--purple) 60%, var(--magenta) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 20px;
+  }
+
+  .hero p {
+    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+    color: var(--text-dim);
+    max-width: 640px;
+    margin: 0 auto 36px;
+    line-height: 1.7;
+  }
+
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: clamp(20px, 4vw, 60px);
+    flex-wrap: wrap;
+  }
+  .stat-item {
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Roboto', sans-serif;
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-weight: 900;
+    color: var(--cyan);
+    display: block;
+  }
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* DIVIDER */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 40px 0 32px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .divider-line { flex: 1; height: 1px; background: var(--border); }
+  .divider-title {
+    font-family: 'Roboto', sans-serif;
+    font-size: clamp(0.7rem, 2vw, 0.85rem);
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    white-space: nowrap;
+  }
+
+  /* COLLAPSIBLE CARD */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+    animation: fadeUp 0.5s ease both;
+    position: relative;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--cyan), var(--purple));
+    border-radius: 3px 0 0 3px;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  .card:hover {
+    border-color: rgba(0,229,255,0.4);
+    box-shadow: 0 0 30px rgba(0,229,255,0.12), 0 8px 40px rgba(0,0,0,0.4);
+    transform: translateY(-2px);
+  }
+  .card:hover::before { opacity: 1; }
+
+  /* Delay variants */
+  .card:nth-child(1) { animation-delay: 0.05s; }
+  .card:nth-child(2) { animation-delay: 0.1s; }
+  .card:nth-child(3) { animation-delay: 0.15s; }
+  .card:nth-child(4) { animation-delay: 0.2s; }
+  .card:nth-child(5) { animation-delay: 0.25s; }
+  .card:nth-child(6) { animation-delay: 0.3s; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: clamp(16px, 3vw, 22px) clamp(18px, 4vw, 28px);
+    cursor: pointer;
+    user-select: none;
+    gap: 12px;
+  }
+
+  .card-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .card-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .icon-cyan { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2); }
+  .icon-purple { background: rgba(180,79,245,0.1); border: 1px solid rgba(180,79,245,0.2); }
+  .icon-green { background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.2); }
+  .icon-magenta { background: rgba(224,64,251,0.1); border: 1px solid rgba(224,64,251,0.2); }
+
+  .card-title {
+    font-family: 'Roboto', sans-serif;
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .card-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .card-chevron {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0,229,255,0.07);
+    border: 1px solid rgba(0,229,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.35s ease, background 0.3s ease;
+    color: var(--cyan);
+    font-size: 0.9rem;
+  }
+  .card.open .card-chevron { transform: rotate(180deg); background: rgba(0,229,255,0.15); }
+
+  .card-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1);
+  }
+  .card.open .card-body { max-height: 2000px; }
+
+  .card-inner {
+    padding: 0 clamp(18px, 4vw, 28px) clamp(20px, 3vw, 28px);
+    border-top: 1px solid var(--border);
+  }
+
+  .card-inner p {
+    font-size: clamp(0.88rem, 2vw, 0.97rem);
+    color: var(--text-dim);
+    line-height: 1.75;
+    margin-top: 16px;
+  }
+
+  /* GRID DE PLATAFORMAS */
+  .platform-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  .platform-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+  }
+  .platform-item:hover {
+    background: rgba(0,229,255,0.05);
+    border-color: rgba(0,229,255,0.3);
+    transform: translateY(-3px);
+  }
+  .platform-name {
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--cyan);
+    margin-bottom: 6px;
+  }
+  .platform-name.purple { color: var(--purple); }
+  .platform-name.green { color: var(--green); }
+  .platform-name.magenta { color: var(--magenta); }
+  .platform-desc {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    line-height: 1.55;
+  }
+
+  /* BENCHMARK BARS */
+  .bench-table { margin-top: 16px; display: flex; flex-direction: column; gap: 16px; }
+  .bench-row {}
+  .bench-label-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 7px;
+  }
+  .bench-name { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+  .bench-leader { font-size: 0.78rem; color: var(--text-dim); }
+  .bench-track {
+    background: rgba(255,255,255,0.04);
+    border-radius: 30px;
+    height: 10px;
+    overflow: hidden;
+  }
+  .bench-fill {
+    height: 100%;
+    border-radius: 30px;
+    width: 0;
+    transition: width 1.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .fill-cyan { background: linear-gradient(90deg, var(--cyan2), var(--cyan)); box-shadow: 0 0 10px rgba(0,229,255,0.5); }
+  .fill-purple { background: linear-gradient(90deg, #8b2fc9, var(--purple)); box-shadow: 0 0 10px rgba(180,79,245,0.5); }
+  .fill-green { background: linear-gradient(90deg, #00b248, var(--green)); box-shadow: 0 0 10px rgba(0,230,118,0.4); }
+  .fill-magenta { background: linear-gradient(90deg, #b000d0, var(--magenta)); box-shadow: 0 0 10px rgba(224,64,251,0.5); }
+
+  /* TIMELINE */
+  .timeline { margin-top: 20px; position: relative; padding-left: 24px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: linear-gradient(180deg, var(--cyan), var(--purple), var(--magenta));
+    border-radius: 2px;
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 24px;
+    padding-left: 20px;
+  }
+  .timeline-item:last-child { margin-bottom: 0; }
+  .timeline-dot {
+    position: absolute;
+    left: -24px;
+    top: 5px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid;
+    background: var(--bg);
+  }
+  .dot-cyan { border-color: var(--cyan); box-shadow: 0 0 8px rgba(0,229,255,0.6); }
+  .dot-purple { border-color: var(--purple); box-shadow: 0 0 8px rgba(180,79,245,0.6); }
+  .dot-magenta { border-color: var(--magenta); box-shadow: 0 0 8px rgba(224,64,251,0.6); }
+  .timeline-year {
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--cyan);
+    margin-bottom: 4px;
+  }
+  .timeline-text { font-size: 0.88rem; color: var(--text-dim); line-height: 1.6; }
+
+  /* TAGS */
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+  .tag-cyan { color: var(--cyan); border-color: rgba(0,229,255,0.3); background: rgba(0,229,255,0.06); }
+  .tag-purple { color: var(--purple); border-color: rgba(180,79,245,0.3); background: rgba(180,79,245,0.06); }
+  .tag-magenta { color: var(--magenta); border-color: rgba(224,64,251,0.3); background: rgba(224,64,251,0.06); }
+  .tag-green { color: var(--green); border-color: rgba(0,230,118,0.3); background: rgba(0,230,118,0.06); }
+
+  /* CALLOUT */
+  .callout {
+    background: rgba(0,229,255,0.05);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    margin-top: 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+  .callout-text { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; font-style: italic; }
+
+  /* FUENTES SECTION */
+  .sources-list { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .source-item {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .source-item:hover { background: rgba(0,229,255,0.04); border-color: rgba(0,229,255,0.25); }
+  .source-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--cyan);
+    flex-shrink: 0;
+    box-shadow: 0 0 6px rgba(0,229,255,0.6);
+  }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 1;
+    background: rgba(5,8,15,0.9);
+    border-top: 1px solid var(--border);
+    padding: 36px clamp(16px, 5vw, 60px);
+    text-align: center;
+  }
+  .footer-logo {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: var(--cyan);
+    text-shadow: 0 0 20px rgba(0,229,255,0.5);
+    margin-bottom: 12px;
+  }
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(10px, 3vw, 30px);
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .footer-link {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color 0.25s;
+  }
+  .footer-link:hover { color: var(--cyan); }
+  .footer-sep { color: var(--border); font-size: 1rem; }
+  .footer-copy {
+    font-size: 0.75rem;
+    color: #3d4f60;
+    letter-spacing: 0.05em;
+  }
+
+  /* SCROLL REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .platform-grid { grid-template-columns: 1fr; }
+    .hero-stats { gap: 24px; }
+    .footer-links { flex-direction: column; gap: 8px; }
+    .footer-sep { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<!-- HEADER -->
+<header>
+  <span class="logo">DATAFLOW IA</span>
+  <span class="header-badge">Informe abril 2026</span>
+</header>
+
+<!-- MAIN -->
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-tag">⚡ Consultora DataflowIA</div>
+    <h1>Plataformas de IA a abril 2026</h1>
+    <p>Análisis estratégico de las plataformas de inteligencia artificial globales, sus capacidades, benchmarks y la evolución hacia la era de los agentes autónomos.</p>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-num">10+</span>
+        <span class="stat-label">Plataformas analizadas</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">4</span>
+        <span class="stat-label">Ejes de benchmark</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">2026+</span>
+        <span class="stat-label">Horizonte AGI</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 1: TITANES DE OCCIDENTE -->
+  <div class="divider reveal"><div class="divider-line"></div><span class="divider-title">Módulo 01 · Titanes de Occidente</span><div class="divider-line"></div></div>
+
+  <div class="card reveal">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="card-icon icon-cyan">🧠</div>
+        <div>
+          <div class="card-title">OpenAI vs. Google DeepMind</div>
+          <div class="card-subtitle">Razonamiento profundo, ecosistemas y multimodalidad nativa</div>
+        </div>
+      </div>
+      <div class="card-chevron">▼</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>Las dos grandes potencias de Occidente libran una batalla por la supremacía en razonamiento y escala de contexto. Cada una apuesta por una arquitectura diferente que define su ventaja competitiva.</p>
+        <div class="platform-grid">
+          <div class="platform-item">
+            <div class="platform-name">ChatGPT (o1 / GPT-5)</div>
+            <div class="platform-desc">Razonamiento Profundo con "Chain of Thought" nativa. Multimodalidad en voz, visión y texto en tiempo real. Memoria dinámica y personalización persistente entre sesiones.</div>
+          </div>
+          <div class="platform-item">
+            <div class="platform-name purple">Gemini 1.5 / 2.0</div>
+            <div class="platform-desc">Ventana de contexto de hasta 2 millones de tokens (libros completos, horas de video). Integración profunda con Google Workspace y Android. Nativo multimodal desde su entrenamiento base.</div>
+          </div>
+        </div>
+        <div class="tags">
+          <span class="tag tag-cyan">Chain of Thought</span>
+          <span class="tag tag-purple">2M Tokens</span>
+          <span class="tag tag-cyan">Memoria Persistente</span>
+          <span class="tag tag-purple">Google Ecosystem</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card reveal">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="card-icon icon-purple">✍️</div>
+        <div>
+          <div class="card-title">Claude (Anthropic) & Perplexity AI</div>
+          <div class="card-subtitle">Precisión ética, escritura natural y descubrimiento en tiempo real</div>
+        </div>
+      </div>
+      <div class="card-chevron">▼</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>Dos plataformas con enfoques radicalmente distintos que se han convertido en referentes de nicho con propuestas de valor claras e irremplazables dentro del ecosistema global.</p>
+        <div class="platform-grid">
+          <div class="platform-item">
+            <div class="platform-name">Claude 3.5 / 4 (Anthropic)</div>
+            <div class="platform-desc">Líder en escritura natural y seguridad ética mediante Constitutional AI. Sus "Artifacts" permiten previsualizar código y UI instantáneamente, reduciendo el ciclo de iteración.</div>
+          </div>
+          <div class="platform-item">
+            <div class="platform-name green">Perplexity AI</div>
+            <div class="platform-desc">El motor de respuesta definitivo. Combina búsqueda web en tiempo real con razonamiento avanzado, eliminando alucinaciones mediante citas directas de fuentes verificables.</div>
+          </div>
+        </div>
+        <div class="callout">
+          <span class="callout-icon">💡</span>
+          <span class="callout-text">Claude lidera en escritura creativa (92% benchmark) gracias a su entrenamiento con énfasis en coherencia narrativa y seguridad ética sistémica.</span>
+        </div>
+        <div class="tags">
+          <span class="tag tag-cyan">Constitutional AI</span>
+          <span class="tag tag-green">Búsqueda Real-Time</span>
+          <span class="tag tag-purple">Artifacts UI</span>
+          <span class="tag tag-green">Anti-Alucinación</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card reveal">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="card-icon icon-green">🌐</div>
+        <div>
+          <div class="card-title">Meta AI (Llama 4) & Grok (xAI)</div>
+          <div class="card-subtitle">Open Source democratizador y datos en tiempo real desde X</div>
+        </div>
+      </div>
+      <div class="card-chevron">▼</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>La democratización de la IA y el acceso sin filtros a la actualidad: dos propuestas que desafían el modelo cerrado dominante y abren nuevas posibilidades para desarrolladores y usuarios avanzados.</p>
+        <div class="platform-grid">
+          <div class="platform-item">
+            <div class="platform-name green">Meta AI (Llama 4)</div>
+            <div class="platform-desc">Modelos de pesos abiertos con rendimiento de nivel GPT-4, integrados nativamente en WhatsApp, Instagram y Facebook. La democratización real de la IA a escala global.</div>
+          </div>
+          <div class="platform-item">
+            <div class="platform-name magenta">Grok (xAI)</div>
+            <div class="platform-desc">Acceso único a la "médula" de la actualidad a través de X (Twitter). Diseñado para ser menos filtrado y más directo, con integración en el ecosistema Tesla/X.</div>
+          </div>
+        </div>
+        <div class="tags">
+          <span class="tag tag-green">Open Source</span>
+          <span class="tag tag-magenta">Tiempo Real X</span>
+          <span class="tag tag-green">WhatsApp / Meta</span>
+          <span class="tag tag-magenta">Tesla Ecosystem</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 2: POTENCIA DE ORIENTE -->
+  <div class="divider reveal"><div class="divider-line"></div><span class="divider-title">Módulo 02 · La Potencia de Oriente</span><div class="divider-line"></div></div>
+
+  <div class="card reveal">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="card-icon icon-cyan">⚡</div>
+        <div>
+          <div class="card-title">DeepSeek: Eficiencia MoE</div>
+          <div class="card-subtitle">Mixture-of-Experts, lógica pura y costos reducidos desde China</div>
+        </div>
+      </div>
+      <div class="card-chevron">▼</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>Originario de China, DeepSeek ha revolucionado el mercado global con su arquitectura <strong style="color:var(--cyan)">Mixture-of-Experts (MoE)</strong>, que permite activar selectivamente solo los parámetros necesarios por tarea, reduciendo drásticamente los costos computacionales.</p>
+        <div class="platform-grid">
+          <div class="platform-item">
+            <div class="platform-name">Programación & Matemáticas</div>
+            <div class="platform-desc">Excelencia comprobada en benchmarks de código y razonamiento matemático formal. Supera a modelos occidentales de mayor tamaño.</div>
+          </div>
+          <div class="platform-item">
+            <div class="platform-name">Costos de Inferencia</div>
+            <div class="platform-desc">Costos de inferencia drásticamente reducidos gracias a MoE. Hace viable el despliegue masivo en hardware de consumo estándar.</div>
+          </div>
+          <div class="platform-item">
+            <div class="platform-name">Lógica Pura</div>
+            <div class="platform-desc">Rendimiento superior en benchmarks de lógica pura (95%). Empata y supera a o1 de OpenAI en múltiples pruebas formales.</div>
+          </div>
+        </div>
+        <div class="tags">
+          <span class="tag tag-cyan">MoE Architecture</span>
+          <span class="tag tag-cyan">95% Benchmark</span>
+          <span class="tag tag-green">Low Cost</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card reveal">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="card-icon icon-purple">📄</div>
+        <div>
+          <div class="card-title">Kimi 2.5 & Qwen 2.5 (Alibaba)</div>
+          <div class="card-subtitle">Contexto masivo, escala multilingüe y e-commerce global</div>
+        </div>
+      </div>
+      <div class="card-chevron">▼</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>Dos gigantes del ecosistema asiático que dominan nichos específicos con capacidades sin parangón en el mundo occidental: procesamiento documental masivo y dominio de idiomas asiáticos.</p>
+        <div class="platform-grid">
+          <div class="platform-item">
+            <div class="platform-name">Kimi 2.5</div>
+            <div class="platform-desc">Especialista en procesamiento de documentos masivos. Capaz de analizar cientos de PDFs en segundos con precisión quirúrgica. Líder en contexto largo (98% benchmark).</div>
+          </div>
+          <div class="platform-item">
+            <div class="platform-name purple">Qwen 2.5 (Alibaba)</div>
+            <div class="platform-desc">El estándar de oro para modelos bilingües. Dominio absoluto en idiomas asiáticos y capacidades de razonamiento optimizadas para e-commerce global y logística.</div>
+          </div>
+        </div>
+        <div class="tags">
+          <span class="tag tag-purple">98% Contexto Largo</span>
+          <span class="tag tag-cyan">Multi-PDF</span>
+          <span class="tag tag-purple">Bilingüe</span>
+          <span class="tag tag-green">E-Commerce</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card reveal">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="card-icon icon-magenta">🤖</div>
+        <div>
+          <div class="card-title">GLM-4 (Zhipu AI): Inteligencia de Agentes</div>
+          <div class="card-subtitle">128K tokens de razonamiento · Autonomía multimodal en escritorio</div>
+        </div>
+      </div>
+      <div class="card-chevron">▼</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>Zhipu AI's GLM-4 representa la vanguardia en agentes autónomos: modelos capaces de navegar por la web, usar herramientas de escritorio y tomar decisiones ejecutivas de forma completamente independiente.</p>
+        <div class="platform-grid">
+          <div class="platform-item">
+            <div class="platform-name magenta">128K Reasoning Tokens</div>
+            <div class="platform-desc">Ventana de razonamiento extendida que permite cadenas de pensamiento profundas para resolver tareas complejas de múltiples pasos.</div>
+          </div>
+          <div class="platform-item">
+            <div class="platform-name magenta">Autonomía Desktop</div>
+            <div class="platform-desc">Lidera el desarrollo de IA que "ve" la pantalla y toma decisiones ejecutivas por el usuario, operando aplicaciones sin intervención humana.</div>
+          </div>
+        </div>
+        <div class="callout">
+          <span class="callout-icon">🔮</span>
+          <span class="callout-text">GLM-4 es el precursor más avanzado de los agentes AGI sistémicos: puede operar flujos de trabajo completos de escritorio de forma autónoma.</span>
+        </div>
+        <div class="tags">
+          <span class="tag tag-magenta">Agentic AI</span>
+          <span class="tag tag-magenta">Computer Vision</span>
+          <span class="tag tag-cyan">128K Context</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 3: BENCHMARKS -->
+  <div class="divider reveal"><div class="divider-line"></div><span class="divider-title">Módulo 03 · Benchmark de Capacidades 2026</span><div class="divider-line"></div></div>
+
+  <div class="card reveal" id="bench-card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="card-icon icon-cyan">📊</div>
+        <div>
+          <div class="card-title">Comparativa de Rendimiento Global</div>
+          <div class="card-subtitle">Lógica · Escritura · Programación · Contexto largo</div>
+        </div>
+      </div>
+      <div class="card-chevron">▼</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>Análisis comparativo de las principales plataformas globales en cuatro ejes de capacidad clave, basado en los benchmarks públicos más relevantes del ecosistema IA 2026.</p>
+        <div class="bench-table">
+          <div class="bench-row">
+            <div class="bench-label-row">
+              <span class="bench-name">Lógica / Matemáticas</span>
+              <span class="bench-leader">o1 / DeepSeek V3 — 95%</span>
+            </div>
+            <div class="bench-track"><div class="bench-fill fill-cyan" data-width="95"></div></div>
+          </div>
+          <div class="bench-row">
+            <div class="bench-label-row">
+              <span class="bench-name">Escritura Creativa</span>
+              <span class="bench-leader">Claude 3.5 / GPT-4o — 92%</span>
+            </div>
+            <div class="bench-track"><div class="bench-fill fill-purple" data-width="92"></div></div>
+          </div>
+          <div class="bench-row">
+            <div class="bench-label-row">
+              <span class="bench-name">Programación</span>
+              <span class="bench-leader">Qwen 2.5 / Sonnet — 90%</span>
+            </div>
+            <div class="bench-track"><div class="bench-fill fill-green" data-width="90"></div></div>
+          </div>
+          <div class="bench-row">
+            <div class="bench-label-row">
+              <span class="bench-name">Contexto Largo</span>
+              <span class="bench-leader">Gemini 1.5 / Kimi — 98%</span>
+            </div>
+            <div class="bench-track"><div class="bench-fill fill-magenta" data-width="98"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 4: ERA AGI -->
+  <div class="divider reveal"><div class="divider-line"></div><span class="divider-title">Módulo 04 · Hacia la Era AGI</span><div class="divider-line"></div></div>
+
+  <div class="card reveal">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="card-icon icon-purple">🚀</div>
+        <div>
+          <div class="card-title">Evolución: De Chatbots a AGI Sistémica</div>
+          <div class="card-subtitle">2023 → 2025 → 2026+ · La IA ya no solo responde; ejecuta</div>
+        </div>
+      </div>
+      <div class="card-chevron">▼</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>La trayectoria de la IA describe una curva de aceleración sin precedentes. En apenas tres años, los sistemas han pasado de responder preguntas a ejecutar flujos de trabajo complejos de forma autónoma.</p>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot dot-cyan"></div>
+            <div class="timeline-year">2023 — Chatbots</div>
+            <div class="timeline-text">La IA como asistente conversacional. Modelos responden preguntas, generan texto y ayudan con tareas puntuales bajo supervisión constante del usuario.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot dot-purple"></div>
+            <div class="timeline-year">2025 — Agentes de Tarea</div>
+            <div class="timeline-text">Sistemas capaces de planificar, usar herramientas y ejecutar secuencias de acciones multi-paso. La IA comienza a operar flujos de trabajo reales sin intervención constante.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot dot-magenta"></div>
+            <div class="timeline-year">2026+ — AGI Sistémica</div>
+            <div class="timeline-text">Agentes que operan organizaciones completas de forma autónoma. La IA ejecuta flujos de trabajo complejos, toma decisiones ejecutivas y se adapta a contextos dinámicos sin supervisión humana constante.</div>
+          </div>
+        </div>
+        <div class="callout">
+          <span class="callout-icon">⚡</span>
+          <span class="callout-text">"La IA ya no solo responde; ejecuta flujos de trabajo completos sin intervención humana constante." — La Revolución IA 2026</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 5: FUENTES -->
+  <div class="divider reveal"><div class="divider-line"></div><span class="divider-title">Módulo 05 · Fuentes del Informe</span><div class="divider-line"></div></div>
+
+  <div class="card reveal">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="card-icon icon-green">📁</div>
+        <div>
+          <div class="card-title">Documentos de Referencia</div>
+          <div class="card-subtitle">Archivos adjuntos analizados para la elaboración de este informe</div>
+        </div>
+      </div>
+      <div class="card-chevron">▼</div>
+    </div>
+    <div class="card-body">
+      <div class="card-inner">
+        <p>Este informe fue elaborado a partir del análisis integral de documentos de investigación por DataflowIA, cuyo contenido fue procesado y sintetizado para producir las secciones precedentes.</p>
+        <div class="sources-list">
+          <div class="source-item">
+            <div class="source-dot"></div>
+            <div>
+              <strong style="color:var(--text); display:block; margin-bottom:3px;">El Estado de la IA 2026.pdf</strong>
+              Documento primario · Análisis de plataformas globales, capacidades y benchmarks comparativos de rendimiento 2026.
+            </div>
+          </div>
+          <div class="source-item">
+            <div class="source-dot" style="background:var(--purple); box-shadow: 0 0 6px rgba(180,79,245,0.6);"></div>
+            <div>
+              <strong style="color:var(--text); display:block; margin-bottom:3px;">La Revolución IA 2026.pptx</strong>
+              Presentación estratégica · Guía de Plataformas Globales y Capacidades · Incluye secciones: Los Titanes de Occidente, La Potencia de Oriente, Benchmark de Capacidades y Hacia la Era AGI.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">DATAFLOW IA</div>
+  <div class="footer-links">
+    <a class="footer-link" href="https://www.dataflowia.com">www.dataflowia.com</a>
+    <span class="footer-sep">·</span>
+    <a class="footer-link" href="mailto:contacto@dataflowia.com">contacto@dataflowia.com</a>
+  </div>
+  <div class="footer-copy">© 2026 DATAFLOW IA · Todos los derechos reservados</div>
+</footer>
+
+<script>
+  // TOGGLE COLLAPSIBLE CARDS
+  function toggleCard(header) {
+    const card = header.closest('.card');
+    card.classList.toggle('open');
+    // Animate benchmarks on open
+    if (card.classList.contains('open')) {
+      setTimeout(() => animateBars(card), 50);
+    }
+  }
+
+  // BENCHMARK BAR ANIMATION
+  function animateBars(container) {
+    const fills = container.querySelectorAll('.bench-fill[data-width]');
+    fills.forEach(fill => {
+      fill.style.width = fill.dataset.width + '%';
+    });
+  }
+
+  // SCROLL REVEAL
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => observer.observe(el));
+
+  // AUTO-OPEN FIRST CARD
+  document.addEventListener('DOMContentLoaded', () => {
+    const first = document.querySelector('.card');
+    if (first) {
+      first.classList.add('open');
+      setTimeout(() => animateBars(first), 100);
+    }
+  });
+</script>
+</body>
+</html>
